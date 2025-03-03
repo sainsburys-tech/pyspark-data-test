@@ -1,22 +1,36 @@
 import argparse
 
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 
 
-def create_spark_views(spark: SparkSession, customers_location: str, products_location: str,
-                       transactions_location: str):
+def read_input_data(
+    spark: SparkSession,
+    customers_location: str,
+    products_location: str,
+    transactions_location: str,
+) -> tuple[DataFrame, DataFrame, DataFrame]:
 
     customers_df = spark.read.csv(customers_location, header=True)
     products_df = spark.read.csv(products_location, header=True)
     transactions_df = spark.read.json(transactions_location, multiLine=True)
 
-    run_transformations(spark, customers_df, products_df, transactions_df)
+    return customers_df, products_df, transactions_df
 
 
-def run_transformations(spark: SparkSession, customers_location: str, products_location: str,
-                        transactions_location: str, output_location: str):
-    create_spark_views(spark, customers_location, products_location, transactions_location)
+def run_transformations(
+    spark: SparkSession,
+    customers_location: str,
+    products_location: str,
+    transactions_location: str,
+    output_location: str
+):
 
+    customers_df, products_df, transactions_df = read_input_data(
+        spark,
+        customers_location,
+        products_location,
+        transactions_location
+    )
 
 def get_latest_transaction_date(spark: SparkSession):
     result = spark.sql("""SELECT MAX(date_of_purchase) AS date_of_purchase FROM raw_transactions""").collect()[0]
@@ -44,5 +58,10 @@ if __name__ == "__main__":
     parser.add_argument('--output_location', required=False, default="./output_data/outputs/")
     args = vars(parser.parse_args())
 
-    run_transformations(spark_session, args['customers_location'], args['products_location'],
-                        args['transactions_location'], args['output_location'])
+    run_transformations(
+        spark_session,
+        args['customers_location'],
+        args['products_location'],
+        args['transactions_location'],
+        args['output_location']
+    )
