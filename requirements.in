@@ -1,0 +1,4 @@
+python-dateutil
+numpy
+pyspark==3.5.5
+pytest
