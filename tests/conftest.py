@@ -12,6 +12,7 @@ def spark():
                     .master("local[2]")
                     .appName("DataTest")
                     .config("spark.executorEnv.PYTHONHASHSEED", "0")
+                    .config("spark.driver.extraJavaOptions", "-XX:-UseContainerSupport")
                     .getOrCreate()
     )
     return spark
